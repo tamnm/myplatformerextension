@@ -2,13 +2,20 @@
  * Basic functions for Platformer Items
  */
 //% color="#a35c74" icon="⚒"
-//% groups="['Melee', 'Range']"
+//% groups="['Sprite', 'Range']"
 namespace PlatFormerSprites {
     //% block
-    //% group="Charactor"
-    export function potato() {
-
+    //% group="Sprite"
+    export function flipSpriteHorizontal(sprite:Sprite):void{
+        sprite.image.flipX()
     }
+
+    //% block
+    //% group="Sprite"
+    export function cloneAndFlipVertically(sprite: Sprite): void {
+        sprite.image.flipX()
+    }
+    
 
     //% block
     //% group="Melee"
