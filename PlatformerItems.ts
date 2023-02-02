@@ -24,12 +24,10 @@ namespace PlatformerItems {
             const actEff = sprite.data["ActiveEff"]
 
             let remain = sprite.data[actEff+ "_remainCooldown"]
-            console.log([actEff,remain, dt])
             remain -= dt
             sprite.data[actEff + "_remainCooldown"] = remain
             
             if(remain <=0) {
-                console.log(["endEff", actEff])
                 sprite.data["ActiveEff"] = null
                 sprite.setImage(sprite.data["OriginalImg"])
             }else{
@@ -67,7 +65,7 @@ namespace PlatformerItems {
     //% group="Effects"
     export function triggerEff(sprite:Sprite, name:string):void{
         if (sprite.data["ActiveEff"]) return;
-        console.log(["TriggerEff",name])
+        
 
         sprite.data["ActiveEff"] = name;
         sprite.data[name + "_remainCooldown"] = sprite.data[name + "_cooldown"];
