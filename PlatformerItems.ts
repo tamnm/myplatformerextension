@@ -1,3 +1,4 @@
+import Item = PlatformerExtensions.Item
 
 /**
  * Sprites on screen
@@ -5,43 +6,26 @@
 //% weight=99 color="#4B7BEC" icon="\uf1d8"
 //% groups='["Create", "Physics", "Effects", "Projectiles", "Overlaps", "Lifecycle"]'
 namespace PlatformerItems {
-    let onEffectSprites:Sprite[]
+    
 
-    function init(){
-        if (onEffectSprites != undefined)
-        return; 
-        
-        onEffectSprites = []
-
-        game.currentScene().eventContext.registerFrameHandler(scene.ANIMATION_UPDATE_PRIORITY, update);
-    }
-
-    function update(){
-        let stillOnEffSprites:Sprite[] = [];
-
-        const dt = game.currentScene().eventContext.deltaTimeMillis;
-        onEffectSprites.forEach(sprite=>{
-            const actEff = sprite.data["ActiveEff"]
-
-            let remain = sprite.data[actEff+ "_remainCooldown"]
-            remain -= dt
-            sprite.data[actEff + "_remainCooldown"] = remain
-            
-            if(remain <=0) {
-                sprite.data["ActiveEff"] = null
-                sprite.setImage(sprite.data["OriginalImg"])
-            }else{
-                stillOnEffSprites.push(sprite)
-            }
-        })
-
-        onEffectSprites = stillOnEffSprites
+    /**
+     * Create a item from an image
+     * @param img the image
+     */
+    //% blockId=platformer_extensions_create_item
+    //% block="Item %img=screen_image_picker of kind %kind=spritekind"
+    //% expandableArgumentMode=toggle
+    //% blockSetVariable=myItem
+    //% group="Effect"
+    //% weight=100
+    export function createItem(img:Image, kind:number): Item {
+        return new Item(img, kind)
     }
 
     //% blockId=sprite_set_effect
-    //% block="Set Sprite $sprite Effect $name Frames $frames Frame Interval(ms) $interval Cooldown (ms) $cooldown"
+    //% block="Set ITem $item Effect $name Frames $frames Frame Interval(ms) $interval Cooldown (ms) $cooldown"
     //% name.shadow=sprite_effect_names
-    //% sprite.shadow=variables_get
+    //% item.shadow=variables_get
     //% frames.shadow=animation_editor
     //% interval.shadow=timePicker
     //% cooldown.shadow=timePicker
@@ -50,39 +34,38 @@ namespace PlatformerItems {
     //% group="Effects"
     //% draggableParameters = "reporter"
     export function setSpriteEffect(
-        sprite: Sprite, 
+        item: Item, 
         name: string, 
         frames: Image[], 
         interval: number, 
         cooldown:number,
-        onEffectTrigger: (onEffectSprite:Sprite)=>void):void {
-        init();
+        afterTrigger: (activeItem:Item)=>void):void {
         
-        sprite.data["OriginalImg"] = sprite.image;
-        sprite.data[name+"_frames"] = frames;
-        sprite.data[name + "_interval"] = interval;
-        sprite.data[name+"_cooldown"] = cooldown;
+        
+        item.addEffect({name, frames,interval,cooldown,event:{afterTrigger}})
     }
 
     //% blockId=sprite_trigger_effect
-    //% block="Trigger Sprite $sprite Effect $name"
+    //% block="Trigger Item $item Effect $name"
     //% name.shadow=sprite_effect_names
-    //% sprite.shadow=variables_get
+    //% item.shadow=variables_get
     //% frames.shadow=animation_editor
     //% weight=40
     //% group="Effects"
-    export function triggerEff(sprite:Sprite, name:string):void{
-        if (sprite.data["ActiveEff"]) return;
-        
-
-        sprite.data["ActiveEff"] = name;
-        sprite.data[name + "_remainCooldown"] = sprite.data[name + "_cooldown"];
-
-        onEffectSprites.push(sprite)
-
-        animation.runImageAnimation(sprite, sprite.data[name + "_frames"], sprite.data[name + "_interval"],false)
-
+    export function triggerEff(item:Item, name:string):void{
+        if(item.isOnEffect()) return
+        item.activateEffect(name)
     }
+
+    //% blockId=platformer_extensions_get_item_sprite
+    //% block="Get Item $item 's sprite"
+    //% item.shadow=variables_get
+    //% weight=40
+    //% group="Effects"
+    export function itemSprite(item:Item): Sprite{
+        return item.getSprite()
+    }
+
 
     //% blockId=sprite_effect_names block="%eff_name"
     //% //% blockHidden=true shim=TD_ID

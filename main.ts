@@ -1,28 +1,10 @@
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    PlatformerItems.triggerEff(mySprite, "Active")
+    PlatformerItems.triggerEff(myITem, "Active")
 })
 let projectile: Sprite = null
-let mySprite: Sprite = null
+let myITem: Item = null
 scene.setBackgroundColor(7)
-mySprite = sprites.create(img`
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . f f 9 9 9 . . . 
-    . . . . . . . . f 9 9 9 9 9 . . 
-    . . . . . . . . f 9 9 9 9 9 9 . 
-    . . . . . . . . f f 9 9 9 9 9 . 
-    . . . . . . . . . f 9 9 9 9 9 . 
-    . . . . . . . e f f f 9 9 9 f f 
-    . . . . . . . e e e f f f f f . 
-    . . . . . e e e f e . . . . . . 
-    . . . . e e f f e . . . . . . . 
-    . . e e f e f . . . . . . . . . 
-    . e . f e e . . . . . . . . . . 
-    . e e f f . . . . . . . . . . . 
-    . f e e . . . . . . . . . . . . 
-    . f e e . . . . . . . . . . . . 
-    f e . . . . . . . . . . . . . . 
-    `, SpriteKind.Player)
-PlatformerItems.setSpriteEffect(mySprite, "Active", [img`
+PlatformerItems.setSpriteEffect(myITem, "Active", [img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . f f 9 9 9 . . . 
     . . . . . . . . f 9 9 9 9 9 . . 
@@ -124,7 +106,7 @@ PlatformerItems.setSpriteEffect(mySprite, "Active", [img`
     . f e e . . . . . . . . . . . . 
     . f e e . . . . . . . . . . . . 
     f e . . . . . . . . . . . . . . 
-    `], 500, 500, function (onEffectSprite) {
+    `], 500, 500, function (activeItem) {
     projectile = sprites.createProjectileFromSprite(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -142,7 +124,7 @@ PlatformerItems.setSpriteEffect(mySprite, "Active", [img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, mySprite, 50, 50)
+        `, PlatformerItems.itemSprite(myITem), 50, 50)
     projectile.setFlag(SpriteFlag.AutoDestroy, true)
     music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
 })

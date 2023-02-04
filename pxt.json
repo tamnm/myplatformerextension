@@ -5,7 +5,8 @@
         "device": "*",
         "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.2.1",
         "Timers": "github:microsoft/arcade-timers#v1.1.0",
-        "arcade-character-animations": "github:microsoft/arcade-character-animations#v0.0.2"
+        "arcade-character-animations": "github:microsoft/arcade-character-animations#v0.0.2",
+        "animation": "*"
     },
     "files": [
         "main.blocks",
@@ -14,7 +15,8 @@
         "assets.json",
         "tilemap.g.jres",
         "tilemap.g.ts",
-        "PlatformerItems.ts"
+        "PlatformerItems.ts",
+        "ItemSprite.ts"
     ],
     "testFiles": [
         "test.ts"
@@ -26,5 +28,5 @@
     "supportedTargets": [
         "arcade"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
