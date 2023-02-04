@@ -45,9 +45,16 @@ namespace PlatformerItems {
     //% frames.shadow=animation_editor
     //% interval.shadow=timePicker
     //% cooldown.shadow=timePicker
+    //% handlerStatement=1
     //% weight=40
     //% group="Effects"
-    export function setSpriteEffect(sprite: Sprite, name: string, frames: Image[], interval: number, cooldown:number):void {
+    export function setSpriteEffect(
+        sprite: Sprite, 
+        name: string, 
+        frames: Image[], 
+        interval: number, 
+        cooldown:number,
+        onEffectTrigger:(s:Sprite)=>void):void {
         init();
         
         sprite.data["OriginalImg"] = sprite.image;
