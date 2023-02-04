@@ -73,12 +73,18 @@ namespace PlatformerExtensions{
             const eff = this.effects[effectName]
             if(!eff) throw "Effect was not found:" + effectName
 
+            // skip if still in effect
+            if(this.currentEffect) return;
+
             this.currentEffect = eff
             this.remainCooldown =  eff.cooldown
 
             onEffectItems.push(this)
 
             animation.runImageAnimation(this.sprite, eff.frames, eff.interval, false)
+            
+            if (eff.event.afterTrigger)
+                eff.event.afterTrigger(this)
         }
 
         clearEffect(): void{

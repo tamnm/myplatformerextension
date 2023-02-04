@@ -4,7 +4,7 @@ import Item = PlatformerExtensions.Item
  * Sprites on screen
  */
 //% weight=99 color="#4B7BEC" icon="\uf1d8"
-//% groups='["Create", "Physics", "Effects", "Projectiles", "Overlaps", "Lifecycle"]'
+//% groups='["Items", "Physics", "Effects", "Projectiles", "Overlaps", "Lifecycle"]'
 namespace PlatformerItems {
     
 
@@ -13,17 +13,26 @@ namespace PlatformerItems {
      * @param img the image
      */
     //% blockId=platformer_extensions_create_item
-    //% block="Item %img=screen_image_picker of kind %kind=spritekind"
+    //% block="Create Item %img=screen_image_picker of kind %kind=spritekind"
     //% expandableArgumentMode=toggle
     //% blockSetVariable=myItem
-    //% group="Effect"
+    //% group="Items"
     //% weight=100
     export function createItem(img:Image, kind:number): Item {
         return new Item(img, kind)
     }
 
+    //% blockId=platformer_extensions_get_item_sprite
+    //% block="Get Item $item 's sprite"
+    //% item.shadow=variables_get
+    //% weight=40
+    //% group="Items"
+    export function itemSprite(item: Item): Sprite {
+        return item.getSprite()
+    }
+
     //% blockId=sprite_set_effect
-    //% block="Set ITem $item Effect $name Frames $frames Frame Interval(ms) $interval Cooldown (ms) $cooldown"
+    //% block="Set Item $item Effect $name Frames $frames Frame Interval(ms) $interval Cooldown (ms) $cooldown"
     //% name.shadow=sprite_effect_names
     //% item.shadow=variables_get
     //% frames.shadow=animation_editor
@@ -56,16 +65,6 @@ namespace PlatformerItems {
         if(item.isOnEffect()) return
         item.activateEffect(name)
     }
-
-    //% blockId=platformer_extensions_get_item_sprite
-    //% block="Get Item $item 's sprite"
-    //% item.shadow=variables_get
-    //% weight=40
-    //% group="Effects"
-    export function itemSprite(item:Item): Sprite{
-        return item.getSprite()
-    }
-
 
     //% blockId=sprite_effect_names block="%eff_name"
     //% //% blockHidden=true shim=TD_ID

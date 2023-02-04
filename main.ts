@@ -1,9 +1,30 @@
+namespace SpriteKind {
+    export const Weapon = SpriteKind.create()
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     PlatformerItems.triggerEff(myITem, "Active")
 })
 let projectile: Sprite = null
 let myITem: Item = null
 scene.setBackgroundColor(7)
+myITem = PlatformerItems.createItem(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . f f 9 9 9 . . . 
+    . . . . . . . . f 9 9 9 9 9 . . 
+    . . . . . . . . f 9 9 9 9 9 9 . 
+    . . . . . . . . f f 9 9 9 9 9 . 
+    . . . . . . . . . f 9 9 9 9 9 . 
+    . . . . . . . e f f f 9 9 9 f f 
+    . . . . . . . e e e f f f f f . 
+    . . . . . e e e f e . . . . . . 
+    . . . . e e f f e . . . . . . . 
+    . . e e f e f . . . . . . . . . 
+    . e . f e e . . . . . . . . . . 
+    . e e f f . . . . . . . . . . . 
+    . f e e . . . . . . . . . . . . 
+    . f e e . . . . . . . . . . . . 
+    f e . . . . . . . . . . . . . . 
+    `, SpriteKind.Weapon)
 PlatformerItems.setSpriteEffect(myITem, "Active", [img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . f f 9 9 9 . . . 
@@ -106,25 +127,27 @@ PlatformerItems.setSpriteEffect(myITem, "Active", [img`
     . f e e . . . . . . . . . . . . 
     . f e e . . . . . . . . . . . . 
     f e . . . . . . . . . . . . . . 
-    `], 500, 500, function (activeItem) {
-    projectile = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . 2 . . . . . . . . 
-        . . . . . . 2 2 2 2 2 2 . . . . 
-        . . . . 2 5 5 5 5 2 2 . 2 . . . 
-        . . . . 5 . . 5 . 5 2 2 2 . . . 
-        . . . . 5 5 5 5 5 5 5 2 . . . . 
-        . . . . 2 2 5 5 5 5 5 2 . . . . 
-        . . . . 2 2 5 5 5 5 5 2 . . . . 
-        . . . . . 2 2 . 5 5 5 5 . . . . 
-        . . . . . . . 2 2 2 5 2 . . . . 
-        . . . . . . . . . 2 . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, PlatformerItems.itemSprite(myITem), 50, 50)
-    projectile.setFlag(SpriteFlag.AutoDestroy, true)
-    music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+    `], 100, 1000, function (activeItem) {
+    timer.after(150, function () {
+        projectile = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 2 . . . . . . . . 
+            . . . . . . 2 2 2 2 2 2 . . . . 
+            . . . . 2 5 5 5 5 2 2 . 2 . . . 
+            . . . . 5 . . 5 . 5 2 2 2 . . . 
+            . . . . 5 5 5 5 5 5 5 2 . . . . 
+            . . . . 2 2 5 5 5 5 5 2 . . . . 
+            . . . . 2 2 5 5 5 5 5 2 . . . . 
+            . . . . . 2 2 . 5 5 5 5 . . . . 
+            . . . . . . . 2 2 2 5 2 . . . . 
+            . . . . . . . . . 2 . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, PlatformerItems.itemSprite(activeItem), 50, -100)
+        projectile.setFlag(SpriteFlag.AutoDestroy, true)
+        music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+    })
 })
