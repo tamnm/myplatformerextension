@@ -48,13 +48,14 @@ namespace PlatformerItems {
     //% handlerStatement=1
     //% weight=40
     //% group="Effects"
+    //% draggableParameters = "reporter"
     export function setSpriteEffect(
         sprite: Sprite, 
         name: string, 
         frames: Image[], 
         interval: number, 
         cooldown:number,
-        onEffectTrigger:(s:Sprite)=>void):void {
+        onEffectTrigger: (onEffectSprite:Sprite)=>void):void {
         init();
         
         sprite.data["OriginalImg"] = sprite.image;
