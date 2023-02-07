@@ -2,11 +2,11 @@ namespace SpriteKind {
     export const Weapon = SpriteKind.create()
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    PlatformerItems.triggerEff(myITem, "Active")
+    myITem.activateEffect("Active")
 })
 let projectile: Sprite = null
-let myITem: Item = null
-scene.setBackgroundColor(7)
+let myITem: PlatformerItems.Item = null
+scene.setBackgroundColor(13)
 myITem = PlatformerItems.createItem(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . f f 9 9 9 . . . 
@@ -25,7 +25,7 @@ myITem = PlatformerItems.createItem(img`
     . f e e . . . . . . . . . . . . 
     f e . . . . . . . . . . . . . . 
     `, SpriteKind.Weapon)
-PlatformerItems.setSpriteEffect(myITem, "Active", [img`
+myITem.addEffect(PlatformerItems.createItemEffect(PlatformerItems._effName("Active"), [img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . f f 9 9 9 . . . 
     . . . . . . . . f 9 9 9 9 9 . . 
@@ -127,7 +127,8 @@ PlatformerItems.setSpriteEffect(myITem, "Active", [img`
     . f e e . . . . . . . . . . . . 
     . f e e . . . . . . . . . . . . 
     f e . . . . . . . . . . . . . . 
-    `], 100, 1000, function (activeItem) {
+    `], 100, 500))
+myITem.addEffectEventHandler("Active", PlatformerItems.EffectEvent.AfterTrigger, function (item) {
     timer.after(150, function () {
         projectile = sprites.createProjectileFromSprite(img`
             . . . . . . . . . . . . . . . . 
@@ -146,7 +147,7 @@ PlatformerItems.setSpriteEffect(myITem, "Active", [img`
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
-            `, PlatformerItems.itemSprite(activeItem), 50, -100)
+            `, item.getSprite(), 50, -100)
         projectile.setFlag(SpriteFlag.AutoDestroy, true)
         music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
     })
