@@ -2,7 +2,7 @@ namespace PlatformerItems {
     //export class PlatformerSprite extends Sprite {
     export type ItemHandle = (item:Item)=>void
     export type Effect={
-        name:string
+        effect_type:number
         frames:Image[]
         interval:number
         cooldown:number
@@ -75,9 +75,18 @@ namespace PlatformerItems {
     //% weight=100
     export function createItem(img: Image, kind: number): Item {
         init()
+        
+        let item = new Item(img)
 
-        let item = new Item(img, kind)
-        onEffectItems.push(item)
+        const scene = game.currentScene();
+        item.setKind(kind);
+        scene.physicsEngine.addSprite(item);
+
+        // run on created handlers
+        scene.createdHandlers
+            .filter(h => h.kind == kind)
+            .forEach(h => h.handler(item));
+
         return item
     }
 
@@ -86,40 +95,60 @@ namespace PlatformerItems {
      * Create a item eff
      */
     //% blockId=platformer_extensions_create_item_effect
-    //% block="Create effect $name Frames $frames Frame Interval(ms) $interval Cooldown (ms) $cooldown"
+    //% block="Create effect $effect_type Frames $frames Frame Interval(ms) $interval Cooldown (ms) $cooldown"
     //% inlineInputMode=inline
-    //% name.shadow=sprite_effect_names
+    //% effect_type.shadow=effecttype
     //% frames.shadow=animation_editor
     //% interval.shadow=timePicker
     //% cooldown.shadow=timePicker
     //% weight=40
     //% group="Items"
     export function createItemEffect(
-        name: string,
+        effect_type: number,
         frames: Image[],
         interval: number,
         cooldown: number): Effect {
-        return { name, frames, interval, cooldown, event: { afterTriggers: [] } }
+        return { effect_type, frames, interval, cooldown, event: { afterTriggers: [] } }
+    }
+ 
+    //% blockId=platformer_extensions_sprite_as_item
+    //% block="$sprite=variables_get(mySprite) as a Item"
+    //group="Items"
+    export function asItem(sprite:Sprite) : Item { 
+        return sprite as Item
     }
 
-    export class Item {
-        sprite: Sprite
+    //% blockId=platformer_extensions_get_held_item
+    //% block="item from Sprite $sprite=variables_get(mySprite)"
+    //group="Items"
+    export function getHeldItem(sprite: Sprite): Item {
+        return sprite.data["item"]
+    }
+
+    //% blockId=platformer_extensions_get_is_holding_item
+    //% block="$sprite=variables_get(mySprite) is holding an item"
+    //group="Items"
+    export function isHoldingItem(sprite: Sprite): boolean{
+        return sprite.data["item"] instanceof Item
+    }
+
+    export class Item extends Sprite {
         direction:-1|1=1
         originalImage:Image
         offset: {x:number,y:number}
         owner:Sprite
-        effects: {[index:string]:Effect}
+        effects: Effect[]
         remainCooldown: number
         currentEffect:Effect = null
 
-        constructor(img:Image, kind:number){
-            this.sprite = sprites.create(img, kind)
-            this.effects = {}
+        constructor(img:Image){
+            super(img)
+            this.effects = []
             this.originalImage = img
         }
 
         isDestroyed():boolean {
-            if(this.sprite.flags & sprites.Flag.Destroyed)
+            if(this.flags & sprites.Flag.Destroyed)
                 return true
             return false
         }
@@ -129,13 +158,6 @@ namespace PlatformerItems {
         //% group="Items"
         isPickable(): boolean {
             return this.owner = undefined
-        }
-
-        //% blockId=platformer_extensions_item_get_sprite
-        //% block="get $this(myItem) sprite"
-        //% group="Items"
-        getSprite () :Sprite {
-            return this.sprite
         }
 
         //% blockId=platformer_extensions_item_get_direction
@@ -149,18 +171,19 @@ namespace PlatformerItems {
         //% block="Add effect $this(myItem) $effect"
         //% group="Items"
         addEffect(effect:Effect):void{
-            this.effects[effect.name] = effect
+            this.effects[effect.effect_type] = effect
         }
 
         //% blockId=platformer_extensions_item_add_effect_event_handler
-        //% block="Add $this(myItem) effect $effectName event $event Handler"
+        //% block="Add $this(myItem) effect $effect_type event $event Handler"
+        //% effect_type.shadow=effecttype
         //% event.defl=EffectEvent.AfterTrigger
         //% handlerStatement=1
         //% draggableParameters = "reporter"
         //% group="Items"
-        addEffectEventHandler(effectName:string, event:EffectEvent, handler:(item: Item)=>void):void{
-            let eff = this.effects[effectName]
-            if(!eff) throw "Effect was not found: "+ effectName
+        addEffectEventHandler(effect_type:number, event:EffectEvent, handler:(item: Item)=>void):void{
+            let eff = this.effects[effect_type]
+            if (!eff) throw "Effect was not found: " + effect_type
 
             switch (event) {
                 case EffectEvent.AfterTrigger:
@@ -173,11 +196,12 @@ namespace PlatformerItems {
         }
 
         //% blockId=platformer_extensions_item_active_effect
-        //% block="Active $this(myItem) Effect $effectName"
+        //% block="Active $this(myItem) Effect $effect_type"
+        //% effect_type.shadow=effecttype
         //% group="Items"
-        activateEffect(effectName:string): void {
-            const eff = this.effects[effectName]
-            if(!eff) throw "Effect was not found:" + effectName
+        activateEffect(effect_type:number): void {
+            const eff = this.effects[effect_type]
+            if (!eff) throw "Effect was not found:" + effect_type
 
             // skip if still in effect
             if(this.currentEffect) return;
@@ -186,7 +210,7 @@ namespace PlatformerItems {
             this.remainCooldown =  eff.cooldown
 
 
-            animation.runImageAnimation(this.sprite, eff.frames, eff.interval, false)
+            animation.runImageAnimation(this, eff.frames, eff.interval, false)
             
             eff.event.afterTriggers.forEach(handler => handler(this))
         }
@@ -197,46 +221,58 @@ namespace PlatformerItems {
         clearEffect(): void{
             this.currentEffect = null
             this.remainCooldown = 0
-            this.sprite.setImage(this.originalImage)
+            this.setImage(this.originalImage)
         }
 
         //% blockId=platformer_extensions_item_attach_sprite
         //% block="Attach $this(myItem) to $ownerSprite=variables_get(mySprite) | x offset  $offset_x| y offset $offset_y"
         //% group="Items"
         attachToSprice(ownerSprite:Sprite, offset_x:number=0, offset_y:number=0):void {
+            
+            if(this.owner && this.owner != ownerSprite) throw "This item already held by another"
+            if(this.owner && this.owner == ownerSprite) return
+
+            onEffectItems.push(this)
+
+            if(ownerSprite.data["item"]) {
+                let item:Item = ownerSprite.data["item"]
+                item.detach()
+            }
+
             this.owner = ownerSprite
+            this.owner.data["item"] = this
             this.offset = {x:offset_x, y:offset_y}
+        }
+
+        detach():void  {
+            this.owner.data["item"] = undefined
+            this.owner = undefined
+            this.offset = undefined
+            this.destroy()
+            onEffectItems.removeElement(this)
         }
 
         updateDirectionAndPosition():void{
             if(this.direction*this.owner.vx <0 ){
                 this.direction*=-1
-                if(this.sprite.image) {
-                    let img = this.sprite.image.clone()
+                if(this.image) {
+                    let img = this.image.clone()
                     img.flipX()
-                    this.sprite.setImage(img)
+                    this.setImage(img)
                 }
-                Object.keys(this.effects).forEach(k => this.flip(this.effects[k]))
+                this.effects.forEach(e=>{
+                    if(e){
+                        this.flip(e)
+                    }
+                })
                 this.offset.x *=-1
                 this.offset.y *=-1
             }
-            this.sprite.setPosition(this.owner.x + this.offset.x, this.owner.y + this.offset.y)
+            this.setPosition(this.owner.x + this.offset.x, this.owner.y + this.offset.y)
         }
 
         private flip(eff:Effect):void {
             eff.frames.forEach(img=>img.flipX())
         }
     }
-
-
-    //% blockId=sprite_effect_names block="%eff_name"
-    //% eff_name.fieldEditor="autocomplete"
-    //% eff_name.fieldOptions.decompileLiterals=true
-    //% eff_name.fieldOptions.key="item_effect_name"
-    //% weight=40
-    //% group="Items"
-    export function _effName(eff_name: string) {
-        return eff_name
-    }
-
 }

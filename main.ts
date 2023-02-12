@@ -20,7 +20,7 @@ function createBall () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Weapon)
-    ball.addEffect(PlatformerItems.createItemEffect(PlatformerItems._effName("Active"), [img`
+    ball.addEffect(PlatformerItems.createItemEffect(EffectTypes.Active, [img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -38,7 +38,7 @@ function createBall () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         `], 100, 500))
-    ball.addEffectEventHandler("Active", PlatformerItems.EffectEvent.AfterTrigger, function (ball) {
+    ball.addEffectEventHandler(EffectTypes.Active, PlatformerItems.EffectEvent.AfterTrigger, function (ball) {
         timer.after(150, function () {
             projectile = sprites.createProjectileFromSprite(img`
                 . . . . . . . . . . . . . . . . 
@@ -57,7 +57,7 @@ function createBall () {
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
-                `, ball.getSprite(), 100 * ball.getDirection(), -50)
+                `, ball, 100 * ball.getDirection(), -50)
             projectile.ay = 100
             projectile.setFlag(SpriteFlag.AutoDestroy, true)
             music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
@@ -66,7 +66,9 @@ function createBall () {
     return ball
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    myItem.activateEffect("Active")
+    if (PlatformerItems.isHoldingItem(mySprite)) {
+        PlatformerItems.getHeldItem(mySprite).activateEffect(EffectTypes.Active)
+    }
 })
 function createGun () {
     gun = PlatformerItems.createItem(img`
@@ -87,7 +89,7 @@ function createGun () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Weapon)
-    gun.addEffect(PlatformerItems.createItemEffect(PlatformerItems._effName("Active"), [img`
+    gun.addEffect(PlatformerItems.createItemEffect(EffectTypes.Active, [img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -139,7 +141,7 @@ function createGun () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         `], 100, 1000))
-    gun.addEffectEventHandler("Active", PlatformerItems.EffectEvent.AfterTrigger, function (item) {
+    gun.addEffectEventHandler(EffectTypes.Active, PlatformerItems.EffectEvent.AfterTrigger, function (item) {
         timer.after(50, function () {
             projectile = sprites.createProjectileFromSprite(img`
                 . . . . . . . . . . . . . . . . 
@@ -158,11 +160,14 @@ function createGun () {
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
-                `, item.getSprite(), 200 * item.getDirection(), 0)
+                `, item, 200 * item.getDirection(), 0)
         })
     })
     return gun
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Weapon, function (sprite, otherSprite) {
+    PlatformerItems.asItem(otherSprite).attachToSprice(sprite, 10, 0)
+})
 function createWand () {
     wand = PlatformerItems.createItem(img`
         . . . . . . . . . . . . . . . . 
@@ -182,7 +187,7 @@ function createWand () {
         . f e e . . . . . . . . . . . . 
         f e . . . . . . . . . . . . . . 
         `, SpriteKind.Weapon)
-    wand.addEffect(PlatformerItems.createItemEffect(PlatformerItems._effName("Active"), [img`
+    wand.addEffect(PlatformerItems.createItemEffect(EffectTypes.Active, [img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . f f 9 9 9 . . . 
         . . . . . . . . f 9 9 9 9 9 . . 
@@ -285,7 +290,7 @@ function createWand () {
         . f e e . . . . . . . . . . . . 
         f e . . . . . . . . . . . . . . 
         `], 100, 500))
-    wand.addEffectEventHandler("Active", PlatformerItems.EffectEvent.AfterTrigger, function (wand) {
+    wand.addEffectEventHandler(EffectTypes.Active, PlatformerItems.EffectEvent.AfterTrigger, function (wand) {
         timer.after(150, function () {
             projectile = sprites.createProjectileFromSprite(img`
                 . . . . . . . . . . . . . . . . 
@@ -304,7 +309,7 @@ function createWand () {
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
-                `, wand.getSprite(), 100 * wand.getDirection(), 0)
+                `, wand, 100 * wand.getDirection(), 0)
             projectile.setFlag(SpriteFlag.AutoDestroy, true)
             music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
         })
@@ -315,10 +320,10 @@ let wand: PlatformerItems.Item = null
 let gun: PlatformerItems.Item = null
 let projectile: Sprite = null
 let ball: PlatformerItems.Item = null
-let myItem: PlatformerItems.Item = null
+let mySprite: Sprite = null
 let picture = null
 scene.setBackgroundColor(13)
-let mySprite = sprites.create(img`
+mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
@@ -337,5 +342,6 @@ let mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     `, SpriteKind.Player)
 controller.moveSprite(mySprite, 50, 50)
-myItem = createWand()
-myItem.attachToSprice(mySprite, 10, 0)
+mySprite.setPosition(19, 18)
+createBall().setPosition(93, 33)
+createWand().setPosition(94, 93)

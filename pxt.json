@@ -16,7 +16,8 @@
         "tilemap.g.jres",
         "tilemap.g.ts",
         "PlatformerItems.ts",
-        "ItemSprite.ts"
+        "ItemSprite.ts",
+        "ItemEffectType.ts"
     ],
     "testFiles": [
         "test.ts"
